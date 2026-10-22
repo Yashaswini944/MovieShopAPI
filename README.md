@@ -1,158 +1,390 @@
-MovieShopAPI 🎬
-ASP.NET Core REST API for a movie-store domain — C# · .NET 10 · Entity Framework Core · SQL Server · Swagger/OpenAPI · Docker
 
-Source code · Related MVC application
-Overview
-MovieShopAPI is a backend-focused .NET project that demonstrates how to organize a movie-store application around HTTP controllers, business services, repository abstractions, and relational persistence. Its current public endpoints support movie discovery and genre-based browsing. The wider solution also defines data models and services for users, accounts, favorites, reviews, purchases, and administrative reporting.
+# MovieShopAPI 🎬
 
-The project is designed as a learning and portfolio application, not a deployed commercial movie store. In particular, the presence of a service or entity does not mean every related API endpoint or security workflow is complete.
-What the project demonstrates
-- Building asynchronous HTTP GET endpoints using ASP.NET Core Web API.
-- Separating controllers, services, repository contracts, and EF Core implementations.
-- Modeling a relational database with one-to-many and many-to-many relationships.
-- Loading related movie data (genres, cast, crew, and trailers) with Entity Framework Core.
-- Implementing paginated genre queries with Skip, Take, and a total record count.
-- Exploring API routes and response models through Swagger/OpenAPI.
-- Structuring an API for local development and container builds.
-Implemented API capabilities
-Area	Current implementation	Notes
-Movie discovery	Endpoints for top-rated and highest-grossing movies	The current “top-rated” repository query sorts by review count, not average rating; see improvements below.
-Movie details	Look up a movie by numeric ID	Returns 404 Not Found when no movie exists.
-Genres	List available genres	Uses a genre service and EF Core repository.
-Genre browsing	Retrieve movies in a genre with pagination	Supports pageSize and pageNumber query parameters.
-Database model	EF Core entities and relationships for movie-store data	Includes users, reviews, favorites, purchases, roles, and reports.
-Account/admin features	Domain service and repository code is present	Do not treat these as fully exposed, secured API workflows.
-File uploads / payment processing	Not implemented as a documented public API capability	Future extension areas.
+**ASP.NET Core REST API for a Movie Store**
 
+**Technologies:** C# | .NET 10 | ASP.NET Core Web API | Entity Framework Core | SQL Server | Swagger | Docker
 
-API endpoint reference
-Routes verified from the MVC-style API controllers in MovieAPI/Controllers:
-Method	Endpoint	Description
-GET	/api/movies/toprated	Return a limited list of movies ranked by the current repository logic.
-GET	/api/movies/highestgrossing	Return up to 30 movies ordered by revenue.
-GET	/api/movies/{id}	Return details for one movie or 404.
-GET	/api/genres	Return the genre catalog.
-GET	/api/genres/{id}/movies?pageSize=30&pageNumber=1	Return a paginated collection of movies in a genre.
+## Overview
 
+MovieShopAPI is a backend-focused application developed using ASP.NET Core Web API, C#, Entity Framework Core, and SQL Server.
 
-These are the endpoints verified in the repository source. Other domain objects and services are not listed as public routes unless a matching API controller is implemented.
+The project demonstrates the design and implementation of a layered backend architecture for a movie-store platform. It focuses on RESTful API development, relational database design, dependency injection, repository patterns, asynchronous programming, and separation of business logic from data access.
 
-Technology stack
-Layer	Technology	Purpose
-Language and runtime	C# / .NET 10	Backend development
-HTTP API	ASP.NET Core Web API	Controllers, routing, JSON responses
-Database access	Entity Framework Core 10	Queries, entity mapping, data access
-Database	Microsoft SQL Server	Relational persistence
-API exploration	Swashbuckle / Swagger UI	Interactive API documentation
-Container build	Docker (multi-stage Dockerfile)	Build and package the API
-Version control	Git / GitHub	Source history and collaboration
+The currently implemented API endpoints support movie discovery, movie details, genre listings, and paginated movie browsing.
 
+The solution also contains domain entities and supporting services for users, roles, reviews, favorites, purchases, and administrative operations.
 
-Architecture
-The solution separates responsibilities into three .NET projects:
+This is a portfolio and learning project intended to demonstrate backend engineering concepts rather than a production-ready commercial application.
+
+## Key Features
+
+### 1. RESTful API Development
+
+- Developed HTTP GET endpoints using ASP.NET Core Web API.
+- Implemented controller-based routing.
+- Used asynchronous methods for database operations.
+- Returned structured JSON responses.
+- Implemented appropriate HTTP responses such as `200 OK` and `404 Not Found`.
+- Organized API functionality using services and repositories.
+
+### 2. Movie Management and Discovery
+
+- Retrieve top-rated movies using the current repository ranking logic.
+- Retrieve highest-grossing movies.
+- Fetch detailed information for individual movies.
+- Access related movie information through Entity Framework Core.
+- Support genre-based browsing.
+
+### 3. Genre Management
+
+- Retrieve available movie genres.
+- Fetch movies belonging to a selected genre.
+- Implement pagination using page number and page size.
+- Return paginated results with supporting metadata.
+
+### 4. Database Integration
+
+- Integrated Microsoft SQL Server using Entity Framework Core.
+- Created domain models for movie-store operations.
+- Configured relationships between entities.
+- Used repository abstractions to separate database operations from application services.
+- Worked with LINQ queries and asynchronous data retrieval.
+
+### 5. Layered Architecture
+
+The application is organized into three projects:
+
+- **ApplicationCore:** Domain entities, application models, and interfaces.
+- **Infrastructure:** Database context, repository implementations, and application services.
+- **MovieAPI:** REST API controllers, configuration, and dependency registration.
+
+This separation improves maintainability, testability, and organization.
+
+## Technology Stack
+
+| Category | Technologies |
+|---|---|
+| Language | C# |
+| Framework | ASP.NET Core Web API, .NET 10 |
+| ORM | Entity Framework Core |
+| Database | Microsoft SQL Server |
+| Architecture | Layered Architecture, Repository Pattern |
+| API Documentation | Swagger / OpenAPI |
+| Containerization | Docker |
+| Version Control | Git, GitHub |
+| Development Concepts | Dependency Injection, LINQ, Async/Await, REST APIs |
+
+## Project Structure
+
+```text
 MovieShopAPI/
-├── ApplicationCore/           # Domain entities, models, service/repository contracts
-├── Infrastructure/            # EF Core DbContext, repositories, services, helpers
-├── MovieAPI/                  # API controllers, startup configuration, appsettings
-├── Dockerfile                 # Multi-stage .NET container build
-└── MovieShopAPI.slnx          # Solution file
+│
+├── ApplicationCore/
+│   ├── Entities/
+│   ├── Models/
+│   └── Contracts/
+│
+├── Infrastructure/
+│   ├── Data/
+│   ├── Repositories/
+│   ├── Services/
+│   └── Helpers/
+│
+├── MovieAPI/
+│   ├── Controllers/
+│   ├── Program.cs
+│   └── appsettings.json
+│
+├── Dockerfile
+└── MovieShopAPI.slnx
+```
+
+The folder structure above is a simplified architectural representation of the solution.
+
+## Application Architecture
+
 ```mermaid
 flowchart TD
-    Client[HTTP client / Swagger / Postman]
-    Controller[ASP.NET Core API controller]
-    Service[Application service interface + implementation]
-    Repository[Repository interface + implementation]
-    Context[EF Core MovieShopDbContext]
-    DB[(Microsoft SQL Server)]
-    Client --> Controller
-    Controller --> Service
-    Service --> Repository
-    Repository --> Context
-    Context --> DB
-```
-ApplicationCore defines entity classes, view/request models, and interfaces that express the application's contracts. Infrastructure implements data access and services, including MovieShopDbContext. MovieAPI accepts HTTP requests and registers the dependencies in Program.cs.
-Example request flow
-When a client requests GET /api/movies/{id}:
-1. MoviesController receives the movie ID.
-2. IMovieService provides the movie-details operation.
-3. The movie repository queries SQL Server via EF Core, including related data.
-4. The service maps the entity into a MovieDetailsModel.
-5. The controller returns JSON (200 OK) or 404 Not Found.
-Relational data model
-MovieShopDbContext defines entity sets for:
-- Catalog: Movie, Genre, MovieGenre, Trailer, Cast, MovieCast, Crew, MovieCrew.
-- Users and access data: User, Role, UserRole.
-- User activity: Review, Favorite, Purchase.
-- Administration: Report.
-Join entities use composite keys where appropriate (for example, movie/genre, movie/user favorites, and user/role associations). EF Core navigation properties and foreign keys connect movies to their genres, cast, crew, reviews, purchases, and favorites.
+    A[API Client / Swagger / Postman]
+    B[ASP.NET Core API Controllers]
+    C[Application Services]
+    D[Repository Layer]
+    E[Entity Framework Core]
+    F[(SQL Server Database)]
 
-This is database/schema modeling, not a claim that every potential feature has a public API endpoint.
-Run locally
-Prerequisites
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+```
+
+### Request Processing
+
+1. An HTTP request is sent to an API endpoint.
+2. The API controller receives the request.
+3. The controller calls the appropriate service.
+4. The service coordinates application logic.
+5. The repository accesses the database using Entity Framework Core.
+6. The result is returned to the client as an HTTP response.
+
+## API Endpoints
+
+The following routes are implemented in the current API controllers.
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/movies/toprated` | Retrieves movies using the current top-rated ranking logic |
+| GET | `/api/movies/highestgrossing` | Retrieves highest-grossing movies |
+| GET | `/api/movies/{id}` | Retrieves movie details |
+| GET | `/api/genres` | Retrieves available genres |
+| GET | `/api/genres/{id}/movies?pageSize=30&pageNumber=1` | Retrieves paginated movies by genre |
+
+### Example API Request
+
+```http
+GET /api/movies/1
+```
+
+The endpoint retrieves information for a movie with the specified ID.
+
+When a matching movie does not exist, the controller returns `404 Not Found`.
+
+### Pagination Example
+
+```http
+GET /api/genres/1/movies?pageSize=10&pageNumber=1
+```
+
+This retrieves the requested page of movies associated with a particular genre.
+
+## Database Design
+
+The application uses a relational database model with the following entity groups.
+
+### Movie Catalog
+
+- Movie
+- Genre
+- MovieGenre
+- Trailer
+- Cast
+- MovieCast
+- Crew
+- MovieCrew
+
+### User Management
+
+- User
+- Role
+- UserRole
+
+### User Activity
+
+- Review
+- Favorite
+- Purchase
+
+### Administration
+
+- Report
+
+### Entity Relationships
+
+The database supports relationships including:
+
+- Movies associated with multiple genres.
+- Movies associated with cast and crew members.
+- Users associated with roles.
+- Users associated with movie reviews.
+- Users associated with favorite movies.
+- Users associated with purchase records.
+
+Entity Framework Core is used to configure and manage these relationships.
+
+## Backend Design Principles
+
+### Separation of Concerns
+
+Controllers, services, and repositories have different responsibilities.
+
+### Dependency Injection
+
+Application dependencies are registered and resolved using ASP.NET Core dependency injection.
+
+### Repository Pattern
+
+Database operations are encapsulated within repository implementations.
+
+### Asynchronous Programming
+
+Asynchronous database methods support non-blocking request handling.
+
+### Relational Data Modeling
+
+Foreign keys, navigation properties, and join entities support structured data relationships.
+
+## Installation and Setup
+
+### Prerequisites
+
 - .NET 10 SDK
-- Microsoft SQL Server instance (or SQL Server Express / LocalDB on supported Windows systems)
-- Git; an editor such as Visual Studio or VS Code is optional
-- Docker Desktop or another compatible Docker engine (optional)
-1. Clone and restore
+- Microsoft SQL Server
+- Git
+- Visual Studio, VS Code, or another compatible IDE
+- Docker (optional)
+
+### Step 1: Clone the Repository
+
+```bash
 git clone https://github.com/Yashaswini944/MovieShopAPI.git
 cd MovieShopAPI
+```
+
+### Step 2: Restore Dependencies
+
+```bash
 dotnet restore MovieShopAPI.slnx
+```
+
+### Step 3: Build the Project
+
+```bash
 dotnet build MovieShopAPI.slnx
-2. Configure the connection string
-MovieAPI/Program.cs reads ConnectionStrings:MovieShopDb. Replace the machine-specific SQL Server connection configured in the checked-in MovieAPI/appsettings.json for your environment.
+```
 
-For local development, prefer .NET user secrets rather than committing credentials:
-dotnet user-secrets init --project MovieAPI/MovieAPI.csproj
-dotnet user-secrets set "ConnectionStrings:MovieShopDb" \
-  "Server=YOUR_SQL_SERVER;Database=MovieShopDb;Integrated Security=True;TrustServerCertificate=True" \
-  --project MovieAPI/MovieAPI.csproj
-The example assumes integrated Windows authentication; for other setups, use a valid SQL Server connection string for your environment. Never commit passwords or production connection strings. User secrets are for local development, not a production secret store.
-3. Prepare the database
-The application needs a SQL Server database containing the tables and relevant movie data. If the repository includes usable EF Core migrations, apply them with:
-dotnet tool install --global dotnet-ef
-dotnet ef database update --project Infrastructure/Infrastructure.csproj \
-  --startup-project MovieAPI/MovieAPI.csproj
-If migrations are not present, the schema must first be created and checked against the model. The database is not assumed to initialize and seed itself on first run. A SQL Server instance and suitable sample records are necessary to see populated movie responses.
-4. Start the API
+### Step 4: Configure SQL Server
+
+The application reads the database connection string from:
+
+```text
+ConnectionStrings:MovieShopDb
+```
+
+Configure a valid SQL Server connection string for your local environment.
+
+For local development, .NET user secrets are preferable to storing sensitive credentials in source control.
+
+### Step 5: Prepare the Database
+
+The project requires a SQL Server database with the appropriate schema and movie records.
+
+If valid Entity Framework Core migrations are available, apply them using the EF Core tooling.
+
+Database creation and automatic data seeding should not be assumed without verifying the current project configuration.
+
+### Step 6: Run the Application
+
+```bash
 dotnet run --project MovieAPI/MovieAPI.csproj --launch-profile http
-The current HTTP launch profile uses http://localhost:5229 unless overridden. Open http://localhost:5229/swagger to inspect available actions, or use any REST client.
-5. Example requests
-curl -i http://localhost:5229/api/movies/toprated
-curl -i http://localhost:5229/api/movies/highestgrossing
-curl -i http://localhost:5229/api/movies/1
-curl -i http://localhost:5229/api/genres
-curl -i 'http://localhost:5229/api/genres/1/movies?pageSize=10&pageNumber=1'
-Results depend on the records in your local database. The movie and genre IDs are examples, not guaranteed seed values.
-Docker build
-A multi-stage Dockerfile is provided at the repository root; the final container runs the compiled MovieAPI.dll.
+```
+
+The checked-in HTTP launch profile uses:
+
+```text
+http://localhost:5229
+```
+
+### Step 7: Open Swagger
+
+```text
+http://localhost:5229/swagger
+```
+
+Swagger allows available API endpoints to be inspected and tested.
+
+## API Testing
+
+Swagger and Postman can be used to validate API functionality.
+
+Suggested test scenarios include:
+
+| Test Scenario | Expected Result |
+|---|---|
+| Retrieve an existing movie | Returns movie information |
+| Retrieve an unknown movie | Returns 404 |
+| Retrieve available genres | Returns genre data |
+| Retrieve movies by genre | Returns the requested collection |
+| Change pagination parameters | Returns the corresponding page |
+| Database connection failure | Produces a configuration or connection error |
+
+A complete automated API test suite is not currently documented in the repository.
+
+## Docker Support
+
+The project includes a Dockerfile supporting container builds.
+
+Build the image:
+
+```bash
 docker build -t movieshop-api .
-The container does not include SQL Server. Supply access to a running SQL Server and configure ConnectionStrings__MovieShopDb in the container environment. Do not bake credentials into the Docker image or publish them in a command transcript.
-Testing and validation
-Swagger UI and Postman can be used to inspect HTTP responses and validate the published endpoints. Recommended checks include:
-Scenario	Expected behavior
-Valid movie ID	Returns a movie details response.
-Unknown movie ID	Returns 404 Not Found.
-List genres	Returns available genre records.
-Genre pagination	Returns the requested page and metadata.
-Database unavailable	Identify and report the connection/configuration error.
+```
 
+A running SQL Server database and suitable connection configuration are still required.
 
-A dedicated automated test suite and coverage results are not documented as part of the current repository. Automated unit/integration tests should be added before describing this project as fully tested.
-Security and implementation status
-This repository is a development-stage example. Domain account services exist, but the current startup pipeline does not establish complete bearer-token or cookie-based authentication. The password helper uses a salted SHA-256 construction, which should be replaced with an approved adaptive password-hashing approach (for example, ASP.NET Core Identity's password hasher) before production use.
+The Docker image does not automatically provision the database.
 
-Other production improvements include validation, access control, centralized error handling, safe secrets management, logging, and an appropriate Swagger configuration for non-development environments.
-Planned improvements
-1. Add automated unit and integration tests, with CI to restore, build, and test each change.
-2. Correct the top-rated query to rank movies by average review rating rather than count of reviews.
-3. Add input validation and bounds for pagination parameters.
-4. Implement an authentication/authorization scheme and protected user/admin endpoints.
-5. Provide reproducible migrations and non-sensitive sample data for local setup.
-6. Add consistent API error responses and operational logging.
-7. Expand APIs for domain functionality that currently lives only in service/repository code.
-8. Add an OpenAPI example collection and API response examples verified against the running app.
-Related project
-MovieShopApp is a separate ASP.NET Core MVC movie-store implementation using a similar layered approach. The MVC application currently accesses its own services/database layer; it should not be represented as a frontend already connected to this REST API.
-Author
-Yashaswini — GitHub profile
-Portfolio project demonstrating .NET API development, layered architecture, Entity Framework Core, SQL Server, and practical backend concepts.
+## Security Considerations
+
+The repository contains account-related domain functionality, but production-ready authentication and authorization are not fully implemented in the current public API.
+
+Before production deployment, the application would require:
+
+- Secure authentication and session or token handling.
+- Role-based access control.
+- Approved adaptive password hashing.
+- Request validation.
+- Centralized exception handling.
+- Secure configuration and secrets management.
+- Logging and monitoring.
+- Automated security and integration tests.
+
+## Current Limitations
+
+- Public API endpoints primarily support movie discovery and genre browsing.
+- Some user and administrative functionality exists in service and repository layers but is not exposed through complete secured API endpoints.
+- The current top-rated movie query ranks by review count rather than average review rating.
+- A complete automated test suite has not been verified.
+- File uploads and payment processing are not implemented as verified public API features.
+- Production deployment is not documented.
+
+## Future Enhancements
+
+- Implement secure authentication using ASP.NET Core Identity or an equivalent established framework.
+- Add role-based authorization.
+- Expose additional user, review, favorites, and purchase-related API endpoints.
+- Add request validation and standardized error responses.
+- Improve movie rating calculations.
+- Implement xUnit unit tests and integration tests.
+- Add GitHub Actions CI.
+- Create reproducible database migrations and sample development data.
+- Improve logging and application monitoring.
+- Expand API documentation.
+
+## What I Learned
+
+Through this project, I strengthened my understanding of:
+
+- Backend API design.
+- ASP.NET Core development.
+- Entity Framework Core.
+- SQL Server database integration.
+- Layered application architecture.
+- Repository and service patterns.
+- Dependency injection.
+- Asynchronous programming.
+- Relational database relationships.
+- API debugging and validation.
+
+## Related Project
+
+**MovieShopApp — ASP.NET Core MVC Application**
+
+https://github.com/Yashaswini944/MovieShopApp
+
+MovieShopApp demonstrates server-rendered UI functionality and database-backed workflows using a similar layered architecture.
+
+The MVC application currently uses its own application services and database access layer rather than calling this REST API directly.
+
+**Project Type:** Backend Development / ASP.NET Core Web API / SQL Server
